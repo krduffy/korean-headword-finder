@@ -2,6 +2,7 @@ from typing import List
 from torch import Tensor, no_grad
 from torch.nn.functional import cosine_similarity
 from transformers import BertTokenizer, BertModel
+import sys
 
 
 def get_example_from_filename(filename: str) -> str:
@@ -21,9 +22,17 @@ def get_senses_from_filename(filename: str) -> List[str]:
 
 class SenseDisambiguator:
 
-    def __init__(self):
-        self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-        self.model = BertModel.from_pretrained("bert-base-uncased")
+    def __init__(self, english_or_korean: str):
+        pretrained_model = ""
+        if english_or_korean == "korean":
+            pretrained_model = "klue/bert-base"
+        elif english_or_korean == "english":
+            pretrained_model = "bert-base-uncased"
+        else:
+            raise ValueError("`english_or_korean` must be 'english' or 'korean'.")
+
+        self.tokenizer = BertTokenizer.from_pretrained(pretrained_model)
+        self.model = BertModel.from_pretrained(pretrained_model)
 
     def get_closest_senses(self, text: str, senses: List[str]) -> List[int]:
         text_pt = self.get_embeddings(text)
@@ -59,11 +68,27 @@ class SenseDisambiguator:
 
 if __name__ == "__main__":
 
-    # ( lemma = "bear" )
-    senses = get_senses_from_filename("./bearsenses.txt")
-    example = get_example_from_filename("./bearwiki.txt")
+    args = sys.argv
 
-    sd = SenseDisambiguator()
+    if len(args) < 2:
+        raise ValueError("You must pass 'english' or 'korean' as the first arg.")
+
+    example_filename = ""
+    sense_filename = ""
+
+    if args[1] == "english":
+        example_filename = "./bearwiki.txt"
+        sense_filename = "./bearsenses.txt"
+    elif args[1] == "korean":
+        example_filename = "./밤위키.txt"
+        sense_filename = "./밤뜻풀이.txt"
+    else:
+        raise ValueError("The first arg passed must be 'english' or 'korean'.")
+
+    example = get_example_from_filename(example_filename)
+    senses = get_senses_from_filename(sense_filename)
+
+    sd = SenseDisambiguator(args[1])
 
     best_indices = sd.get_closest_senses(example, senses)
 
