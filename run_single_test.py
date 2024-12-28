@@ -49,8 +49,8 @@ if __name__ == "__main__":
     filename = ""
     word = args[2]
 
-    english_dir = "eng_inputs/homographs"
-    korean_dir = "kor_inputs/homographs"
+    english_dir = "inputs/eng/homographs"
+    korean_dir = "inputs/kor/homographs"
 
     if args[1] == "english":
         filename = os.path.join(english_dir, f"{word}.txt")

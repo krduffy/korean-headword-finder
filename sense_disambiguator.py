@@ -3,8 +3,7 @@ from torch import Tensor, no_grad
 from torch.nn.functional import cosine_similarity
 from transformers import BertTokenizer, BertModel
 from token_weighting import TokenWeightingStrategy
-
-type Language = Literal["english", "korean"]
+from test_types import Language
 
 
 class SenseDisambiguator:
