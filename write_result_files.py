@@ -20,7 +20,9 @@ def get_rows_for_test_result(test_result) -> list:
     return [
         [
             test_result["target_lemma"],
-            test_result["token_weighing_strategy"],
+            test_result["token_weighing_strategy"]
+            + " / "
+            + test_result["similarity_comparison_strategy"],
             example_and_sense_set["example"][0],
             example_and_sense_set["example"][1],
             get_score(example_and_sense_set),
@@ -41,7 +43,7 @@ def get_dataframe(test_results) -> pd.DataFrame:
         flattened,
         columns=[
             "target_lemma",
-            "token_weighting_strategy",
+            "strategies",
             "example_text",
             "example_source",
             "score",
@@ -64,22 +66,22 @@ def create_png(df: pd.DataFrame, png_path: str):
     rc("font", family="New Gulim")
 
     lemmas = df["target_lemma"].unique()
-    strategies = df["token_weighting_strategy"].unique()
+    strategies_values = df["strategies"].unique()
 
     plt.figure(figsize=(12, 6))
 
     x = np.arange(len(lemmas))
-    width = 0.35
+    width = 0.7 / len(strategies_values)
 
-    for i, strategy in enumerate(strategies):
-        strategy_data = df[df["token_weighting_strategy"] == strategy]
+    for i, strategy_set in enumerate(strategies_values):
+        strategy_data = df[df["strategies"] == strategy_set]
         scores = [
             strategy_data[strategy_data["target_lemma"] == lemma]["score"].iloc[0]
             for lemma in lemmas
         ]
 
         positions = x + (i - 0.5) * width
-        plt.bar(positions, scores, width, label=strategy)
+        plt.bar(positions, scores, width, label=strategy_set)
 
     plt.xlabel("Lemmas")
     plt.ylabel("Score")

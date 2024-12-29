@@ -1,14 +1,20 @@
-from typing import List, Literal, Tuple
+from typing import List, Tuple
 from torch import Tensor, no_grad
 from torch.nn.functional import cosine_similarity
 from transformers import BertTokenizer, BertModel
+from similarity_comparing import SimilarityComparisonStrategy
 from token_weighing import TokenWeighingStrategy
 from test_types import Language
 
 
 class SenseDisambiguator:
 
-    def __init__(self, language: Language, weighing_strategy: TokenWeighingStrategy):
+    def __init__(
+        self,
+        language: Language,
+        weighing_strategy: TokenWeighingStrategy,
+        similarity_comparison_strategy: SimilarityComparisonStrategy,
+    ):
         pretrained_model = ""
 
         if language == "korean":
@@ -30,6 +36,7 @@ class SenseDisambiguator:
 
         self.tokenizer = BertTokenizer.from_pretrained(pretrained_model)
         self.model = BertModel.from_pretrained(pretrained_model)
+        self.similarity_comparer = similarity_comparison_strategy()
 
     def get_ordered_sense_indices(
         self, text: str, senses: List[str]
@@ -37,10 +44,10 @@ class SenseDisambiguator:
         text_pt = self._get_embeddings(text)
         sense_pts = [self._get_embeddings(sense) for sense in senses]
 
-        cosine_sims = self._get_cosine_similarities(text_pt, sense_pts)
+        similarities = self._get_all_similarities(text_pt, sense_pts)
 
         indices_with_sim = [
-            (index, cosine_sims[index]) for index in range(len(cosine_sims))
+            (index, similarities[index]) for index in range(len(similarities))
         ]
         indices_with_sim.sort(key=lambda t: t[1], reverse=True)
 
@@ -65,10 +72,10 @@ class SenseDisambiguator:
 
         return (sum_embeddings / sum_weights).unsqueeze(0)
 
-    def _get_cosine_similarities(
+    def _get_all_similarities(
         self, example_tensor: Tensor, sense_tensors: List[Tensor]
     ) -> List[float]:
         return [
-            cosine_similarity(example_tensor, sense_tensor).item()
+            self.similarity_comparer.get_similarity(example_tensor, sense_tensor)
             for sense_tensor in sense_tensors
         ]

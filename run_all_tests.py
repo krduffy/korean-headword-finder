@@ -1,5 +1,6 @@
 import sys
 from typing import List, Tuple
+from similarity_comparing import CosineSimilarityStrategy, EuclideanDistanceStrategy
 from test_types import Language, Example
 import os
 from run_single_test import read_from_file
@@ -8,7 +9,13 @@ from sense_disambiguator import SenseDisambiguator
 from token_weighing import DoNoWeighingStrategy, StopWordsLowWeightStrategy
 from write_result_files import write_result_files
 
-all_configs = [[DoNoWeighingStrategy, StopWordsLowWeightStrategy]]
+all_configs = [
+    [DoNoWeighingStrategy, StopWordsLowWeightStrategy],
+    [
+        CosineSimilarityStrategy,
+        # EuclideanDistanceStrategy
+    ],
+]
 config_combinations = product(*all_configs)
 
 
@@ -36,6 +43,7 @@ def run_all_examples_with_all_configs(
                 {
                     "target_lemma": target_lemma,
                     "token_weighing_strategy": config_combination[0].__name__,
+                    "similarity_comparison_strategy": config_combination[1].__name__,
                     "senses": example_sense_pairs[1],
                     "examples_and_sense_similarities": [
                         {
