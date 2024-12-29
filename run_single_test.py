@@ -66,11 +66,11 @@ if __name__ == "__main__":
             f"IO error occurred; file probably doesn't exist. Details: {error}"
         )
 
-    from token_weighting import DoNoWeightingStrategy, StopWordsLowWeightStrategy
+    from token_weighing import DoNoWeighingStrategy, StopWordsLowWeightStrategy
 
     strategy = None
     if args[3] == "none":
-        strategy = DoNoWeightingStrategy
+        strategy = DoNoWeighingStrategy
     elif args[3] == "stop_words_low_weight":
         strategy = StopWordsLowWeightStrategy
     else:

@@ -3,7 +3,7 @@ from typing import Set
 from torch import Tensor, float32, ones
 
 
-class TokenWeightingStrategy(ABC):
+class TokenWeighingStrategy(ABC):
     def __init__(self, stopwords: Set[str]):
         self.stopwords = stopwords
 
@@ -12,12 +12,12 @@ class TokenWeightingStrategy(ABC):
         pass
 
 
-class DoNoWeightingStrategy(TokenWeightingStrategy):
+class DoNoWeighingStrategy(TokenWeighingStrategy):
     def get_mask(self, tokens: Tensor) -> Tensor:
         return ones(len(tokens), dtype=float32)
 
 
-class StopWordsLowWeightStrategy(TokenWeightingStrategy):
+class StopWordsLowWeightStrategy(TokenWeighingStrategy):
 
     def _is_stopword(self, token: str) -> bool:
         if token in self.stopwords:

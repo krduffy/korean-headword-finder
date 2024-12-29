@@ -2,13 +2,13 @@ from typing import List, Literal, Tuple
 from torch import Tensor, no_grad
 from torch.nn.functional import cosine_similarity
 from transformers import BertTokenizer, BertModel
-from token_weighting import TokenWeightingStrategy
+from token_weighing import TokenWeighingStrategy
 from test_types import Language
 
 
 class SenseDisambiguator:
 
-    def __init__(self, language: Language, weighting_strategy: TokenWeightingStrategy):
+    def __init__(self, language: Language, weighing_strategy: TokenWeighingStrategy):
         pretrained_model = ""
 
         if language == "korean":
@@ -16,14 +16,14 @@ class SenseDisambiguator:
 
             from spacy.lang.ko import stop_words
 
-            self.token_weigher = weighting_strategy(stopwords=stop_words.STOP_WORDS)
+            self.token_weigher = weighing_strategy(stopwords=stop_words.STOP_WORDS)
 
         elif language == "english":
             pretrained_model = "bert-base-uncased"
 
             from spacy.lang.en import stop_words
 
-            self.token_weigher = weighting_strategy(stopwords=stop_words.STOP_WORDS)
+            self.token_weigher = weighing_strategy(stopwords=stop_words.STOP_WORDS)
 
         else:
             raise ValueError("`language` must be 'english' or 'korean'.")
