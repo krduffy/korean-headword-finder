@@ -1,3 +1,4 @@
+from similarity_comparing import CosineSimilarityStrategy
 from test_types import TestCase
 import os
 import sys
@@ -81,7 +82,7 @@ if __name__ == "__main__":
 
     from sense_disambiguator import SenseDisambiguator
 
-    sd = SenseDisambiguator(args[1], strategy)
+    sd = SenseDisambiguator(args[1], strategy, CosineSimilarityStrategy)
 
     for example in examples:
         index_ranking = sd.get_ordered_sense_indices(example[0], senses)
