@@ -1,5 +1,5 @@
+For non-hidden inputs,
 Senses are from urimalsaem (우리말샘)
-
 Senses are from wiktionary
 
 A file is formatted as such:

@@ -58,8 +58,6 @@ def write_result_files(test_results, path_to_file_without_ext):
 
     create_png(df, f"{path_to_file_without_ext}.png")
 
-    df.to_csv(f"{path_to_file_without_ext}.csv")
-
 
 def create_png(df: pd.DataFrame, png_path: str):
 

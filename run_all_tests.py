@@ -52,11 +52,28 @@ def run_all_examples_with_all_configs(
     return results
 
 
-def run_all_in_dir(dir: str, language: Language):
-    all_files = os.listdir(dir)
-    target_lemmas = [os.path.splitext(filename)[0] for filename in all_files]
+def get_all_files_starting_in_dir(dir: str):
+    all_files = []
 
-    all_files = [os.path.join(dir, filename) for filename in all_files]
+    for file_or_dir in os.listdir(dir):
+
+        joined_with_path = os.path.join(dir, file_or_dir)
+
+        if os.path.isdir(joined_with_path):
+            all_files.extend(get_all_files_starting_in_dir(joined_with_path))
+        else:
+            all_files.append(joined_with_path)
+
+    return all_files
+
+
+def run_all_in_dir(dir: str, language: Language):
+
+    all_files = get_all_files_starting_in_dir(dir)
+    target_lemmas = [
+        os.path.splitext(filename)[0].split(os.sep)[-1] for filename in all_files
+    ]
+
     example_sense_pairs = [read_from_file(filename) for filename in all_files]
 
     return run_all_examples_with_all_configs(
