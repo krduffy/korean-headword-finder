@@ -2,10 +2,10 @@ import re
 from typing import List, Tuple
 from torch import Tensor, no_grad
 import torch
+import torch.nn.functional as F
 from transformers import BertTokenizer, BertModel
 from lemmatizer import EnglishLemmatizer, KoreanLemmatizer
 from similarity_comparing import SimilarityComparisonStrategy
-from token_weighing import TokenWeighingStrategy
 from test_types import Language
 
 
@@ -20,7 +20,7 @@ class MatchingUsageSenseDisambiguator:
 
         if language == "korean":
             pretrained_model = "klue/bert-base"
-            self.lemmatizer = KoreanLemmatizer(attach_다_to_verbs=False)
+            self.lemmatizer = KoreanLemmatizer(attach_다_to_verbs=True)
 
         elif language == "english":
             pretrained_model = "bert-base-uncased"
@@ -106,6 +106,8 @@ class MatchingUsageSenseDisambiguator:
         unknown_usage_embedding: Tensor,
         known_usage_embeddings: List[List[Tensor]],
     ) -> List[List[float]]:
+        unknown_norm = F.normalize(unknown_usage_embedding, p=2, dim=-1)
+
         return [
             [
                 self.similarity_comparer.get_similarity(
@@ -125,7 +127,7 @@ class MatchingUsageSenseDisambiguator:
         )
 
         if tgt_marked_unknown_usage is None:
-            print("couldnt find")
+            print("Could not find lemma in input `unknown_usage`.")
             return []
 
         tgt_marked_known_usages = self._replace_curly_in_all_known_usages(known_usages)
@@ -140,8 +142,6 @@ class MatchingUsageSenseDisambiguator:
         similarities = self._get_all_similarities(
             embedding_of_target_lemma_in_unknown, embeddings_of_target_lemma_in_knowns
         )
-
-        print(similarities)
 
         # flattening to one level; will later add a configurable way to do this
         similarities = [

@@ -1,12 +1,25 @@
-from typing import List, Literal, Tuple
-
-# ( example text, source, index of correct sense )
-type Example = Tuple[str, str, int]
-
-# ( example texts, list of senses )
-type TestCaseForMatchingSenses = Tuple[List[Example], List[str]]
-
-# ( list of lists of examples of usage, list of examples with unknown usage )
-type TestCaseForMatchingUsage = Tuple[List[List[str]], List[str]]
+from typing import List, Literal
+from dataclasses import dataclass
 
 type Language = Literal["english", "korean"]
+
+
+@dataclass(frozen=True)
+class UnknownUsageExample:
+    usage: str
+    source: str
+    index_of_correct_sense: int
+
+
+@dataclass(frozen=True)
+class TestCaseForMatchingSenses:
+    lemma: str
+    unknown_usage_examples: List[UnknownUsageExample]
+    senses: List[str]
+
+
+@dataclass(frozen=True)
+class TestCaseForMatchingKnownUsages:
+    lemma: str
+    unknown_usage_examples: List[UnknownUsageExample]
+    known_usage_lists: List[List[str]]

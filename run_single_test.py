@@ -1,48 +1,44 @@
 from similarity_comparing import CosineSimilarityStrategy
-from test_types import TestCaseForMatchingSenses, TestCaseForMatchingUsage
-import os
+from test_types import (
+    TestCaseForMatchingSenses,
+    TestCaseForMatchingKnownUsages,
+    UnknownUsageExample,
+    Language,
+)
 import sys
+import json
 
 from print_test_result_info import print_test_result_to_stream
 
 
-def read_from_file_matching_usage(filename: str) -> TestCaseForMatchingUsage:
+def read_from_file_matching_known_usages(
+    json_filename: str,
+) -> TestCaseForMatchingKnownUsages:
 
-    all_lines = []
+    json_data = None
 
-    with open(filename, "r", encoding="utf-8") as file:
-        all_lines = [line.strip() for line in file]
-
-    current_index = 0
-
-    num_senses = int(all_lines[current_index])
-    current_index += 1
-
-    list_of_sense_usages = []
-
-    for _ in range(num_senses):
-        num_of_usages = int(all_lines[current_index])
-        current_index += 1
-
-        these_usages = all_lines[current_index : current_index + num_of_usages]
-        current_index += num_of_usages
-        list_of_sense_usages.append(these_usages)
-
-    num_examples = int(all_lines[current_index])
-    current_index += 1
-    examples = []
-
-    for _ in range(num_examples):
-        examples.append(
-            (
-                all_lines[current_index],
-                all_lines[current_index + 1],
-                int(all_lines[current_index + 2]),
-            )
+    try:
+        with open(json_filename, "r", encoding="utf-8") as file:
+            json_data = json.load(file)
+    except IOError:
+        raise Exception(
+            f"IOError occurred while reading from json file {json_filename}"
         )
-        current_index += 3
+    except json.JSONDecodeError:
+        raise Exception(f"JSON could not properly decode data in file {json_filename}")
 
-    return (list_of_sense_usages, examples)
+    return TestCaseForMatchingKnownUsages(
+        lemma=json_data["lemma"],
+        unknown_usage_examples=[
+            UnknownUsageExample(
+                usage=object["usage"],
+                source=object["source"],
+                index_of_correct_sense=object["index_of_correct_sense"],
+            )
+            for object in json_data["unknown_usages"]
+        ],
+        known_usage_lists=json_data["known_usages"],
+    )
 
 
 def read_from_file_matching_senses(filename: str) -> TestCaseForMatchingSenses:
@@ -77,12 +73,30 @@ def read_from_file_matching_senses(filename: str) -> TestCaseForMatchingSenses:
     return (examples, senses)
 
 
-def do_matching_usage_algorithm(args, data):
+def do_matching_usage_algorithm(
+    language: Language, test_case_data: TestCaseForMatchingKnownUsages
+):
     from match_usage_sense_disambiguator import MatchingUsageSenseDisambiguator
 
-    sd = MatchingUsageSenseDisambiguator(args[1], CosineSimilarityStrategy)
+    sd = MatchingUsageSenseDisambiguator(language, CosineSimilarityStrategy)
 
-    print(sd.get_ordered_usage_indices("눈", data[1][2][0], data[0]))
+    for unknown_usage_example in test_case_data.unknown_usage_examples:
+
+        res = sd.get_ordered_usage_indices(
+            test_case_data.lemma,
+            unknown_usage_example.usage,
+            test_case_data.known_usage_lists,
+        )
+
+        print_test_result_to_stream(
+            unknown_usage_example,
+            [
+                list_of_known_usages[0]
+                for list_of_known_usages in test_case_data.known_usage_lists
+            ],
+            res,
+            sys.stdout,
+        )
 
 
 def do_matching_senses_algorithm(args, data):
@@ -90,9 +104,9 @@ def do_matching_senses_algorithm(args, data):
     from token_weighing import DoNoWeighingStrategy, StopWordsLowWeightStrategy
 
     strategy = None
-    if args[4] == "none":
+    if args[3] == "none":
         strategy = DoNoWeighingStrategy
-    elif args[4] == "stop_words_low_weight":
+    elif args[3] == "stop_words_low_weight":
         strategy = StopWordsLowWeightStrategy
     else:
         raise ValueError(
@@ -122,18 +136,11 @@ if __name__ == "__main__":
 
     filetype = args[4]
 
-    if filetype == "matching_usage":
-        data = read_from_file_matching_usage(filepath)
-        do_matching_usage_algorithm(args, data)
-    elif filetype == "senses":
-        data = read_from_file_matching_senses(filepath)
-        do_matching_senses_algorithm(args, data)
-
     try:
         if filetype == "matching_usage":
-            data = read_from_file_matching_usage(filepath)
-            do_matching_usage_algorithm(args, data)
-        elif filetype == "senses":
+            test_case_data = read_from_file_matching_known_usages(filepath)
+            do_matching_usage_algorithm(args[1], test_case_data)
+        elif filetype == "matching_senses":
             data = read_from_file_matching_senses(filepath)
             do_matching_senses_algorithm(args, data)
     except IOError as error:

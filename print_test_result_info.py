@@ -1,5 +1,5 @@
 from typing import List, TextIO, Tuple
-from test_types import Example
+from test_types import UnknownUsageExample
 
 RED = "\033[31m"
 GREEN = "\033[32m"
@@ -17,18 +17,19 @@ def get_similarity_score_color(similarity_score) -> str:
 
 
 def print_test_result_to_stream(
-    example: Example,
+    example: UnknownUsageExample,
     senses: List[str],
     index_ranking: List[Tuple[int, float]],
     file: TextIO,
 ):
 
-    print(f"Example: {example[0]} | source: {example[1]}", file=file)
+    print("=" * 70, file=file)
+    print(f"Unknown usage: {example.usage} | source: {example.source}", file=file)
 
     for sensenum, similarity in index_ranking:
         formatted_sense = (
             f"{GREEN}{senses[sensenum]}{RESET}"
-            if sensenum == example[2]
+            if sensenum == example.index_of_correct_sense
             else senses[sensenum]
         )
 
@@ -37,3 +38,5 @@ def print_test_result_to_stream(
         )
 
         print(f"{formatted_similarity} | {formatted_sense}", file=file)
+
+    print("=" * 70, file=file)
