@@ -4,6 +4,9 @@ from typing import List, Literal, Tuple
 type Example = Tuple[str, str, int]
 
 # ( example texts, list of senses )
-type TestCase = Tuple[List[Example], List[str]]
+type TestCaseForMatchingSenses = Tuple[List[Example], List[str]]
+
+# ( list of lists of examples of usage, list of examples with unknown usage )
+type TestCaseForMatchingUsage = Tuple[List[List[str]], List[str]]
 
 type Language = Literal["english", "korean"]
