@@ -25,7 +25,7 @@ def delete_sources_from_usages(
             ]
 
 
-def read_from_file_matching_known_usages(
+def read_from_file(
     json_filename: str,
 ) -> TestCaseForMatchingKnownUsages:
 
@@ -96,5 +96,5 @@ if __name__ == "__main__":
 
     filepath = "inputs/kor/matching_usage/타다.json"
 
-    test_case_data = read_from_file_matching_known_usages(filepath)
+    test_case_data = read_from_file(filepath)
     do_matching_usage_algorithm(args[1], test_case_data)
