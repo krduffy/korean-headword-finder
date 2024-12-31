@@ -9,6 +9,7 @@ def write_result_files(results, columns_in_results, path_to_dir):
     rc("font", family="New Gulim")
 
     df = pd.DataFrame(results, columns=columns_in_results)
+    combine_config_columns(df)
 
     write_all_lemma_files(df, path_to_dir)
     write_aggregated_file(df, path_to_dir)
@@ -16,14 +17,14 @@ def write_result_files(results, columns_in_results, path_to_dir):
 
 def write_all_lemma_files(df: pd.DataFrame, path_to_dir: str):
 
-    combine_config_columns(df)
-
     lemmas = df["lemma"].unique()
 
     for lemma in lemmas:
         os.makedirs(os.path.dirname(f"{path_to_dir}/lemmas/{lemma}.png"), exist_ok=True)
 
         data_for_lemma_df = df[df["lemma"] == lemma]
+
+        data_for_lemma_df = data_for_lemma_df.groupby("combined_config")["score"].mean()
 
         data_for_lemma_df.plot(
             kind="bar",
@@ -54,9 +55,7 @@ def combine_config_columns(df: pd.DataFrame):
 
 def write_aggregated_file(df: pd.DataFrame, path_to_dir: str):
 
-    combine_config_columns(df)
-
-    aggregated_df = df.groupby("combined_config")["score"].mean().reset_index()
+    aggregated_df = df.groupby("combined_config")["score"].mean()
 
     os.makedirs(os.path.dirname(f"{path_to_dir}/aggregated.png"), exist_ok=True)
 

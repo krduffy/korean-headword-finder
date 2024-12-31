@@ -10,13 +10,13 @@ from write_result_files import write_result_files
 
 all_configs = [
     # Definition weights tested
-    [0.0],
+    [0.0, 0.1, 0.2],
     # Known usage similarity flatteners tested
-    [MaxStrategy],
+    [MaxStrategy, AverageStrategy],
     # Sense similarity flatteners tested
-    [MaxStrategy],
+    [MaxStrategy, AverageStrategy],
     # Definition similarity flatteners tested
-    [MaxStrategy],
+    [MaxStrategy, AverageStrategy],
 ]
 config_combinations = product(*all_configs)
 

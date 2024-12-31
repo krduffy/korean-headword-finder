@@ -58,13 +58,11 @@ def read_from_file(
 
 
 def do_matching_usage_algorithm(
-    language: Language, test_case_data: TestCaseForMatchingKnownUsages
+    disambiguator_args, test_case_data: TestCaseForMatchingKnownUsages
 ):
     from match_usage_sense_disambiguator import MatchingUsageHeadwordDisambiguator
 
-    sd = MatchingUsageHeadwordDisambiguator(
-        language, 0.0, AverageStrategy, MaxStrategy, AverageStrategy
-    )
+    sd = MatchingUsageHeadwordDisambiguator(*disambiguator_args)
 
     for unknown_usage_example in test_case_data.unknown_usage_examples:
 
@@ -85,16 +83,39 @@ def do_matching_usage_algorithm(
         )
 
 
+def string_to_flattening_strategy(string: str):
+    if string == "max":
+        return MaxStrategy
+    if string == "average":
+        return AverageStrategy
+    raise ValueError(f"Unknown strategy supplied '{string}'")
+
+
 if __name__ == "__main__":
 
     args = sys.argv
 
-    # if len(args) < 4:
-    #    raise ValueError(
-    #        """Usage: `python run_single_test.py <language> <filepath> <weighing policy class name> <match usage>`"""
-    #    )
+    if len(args) < 7:
+        raise ValueError(
+            """Usage: `python run_single_test.py 
+            <language> 
+            <filepath> 
+            <definition_weight>
+            <known_usage_similarity_flattener>
+            <sense_similarity_flattener>
+            <definition_similarity_flatten>`"""
+        )
 
-    filepath = "inputs/kor/matching_usage/타다.json"
+    if args[1] not in ["korean", "english"]:
+        raise ValueError(f"Unknown language supplied '{args[1]}'")
+
+    disambiguator_args = [
+        args[1],
+        float(args[3]),
+        *[string_to_flattening_strategy(string) for string in args[4:7]],
+    ]
+
+    filepath = "inputs/kor/타다.json"
 
     test_case_data = read_from_file(filepath)
-    do_matching_usage_algorithm(args[1], test_case_data)
+    do_matching_usage_algorithm(disambiguator_args, test_case_data)

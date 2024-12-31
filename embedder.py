@@ -14,7 +14,7 @@ class Embedder:
         self.tokenizer.add_special_tokens(added_target_word_tokens)
 
         self.model = BertModel.from_pretrained(pretrained_model)
-        self.model.resize_token_embeddings(len(self.tokenizer))
+        self.model.resize_token_embeddings(len(self.tokenizer), mean_resizing=True)
 
     def get_embedding_from_tgt_marked_text(self, text: str) -> torch.Tensor:
         inputs = self.tokenizer(text, return_tensors="pt", add_special_tokens=True)
