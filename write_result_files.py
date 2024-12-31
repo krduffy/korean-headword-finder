@@ -1,97 +1,76 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rc
-import numpy as np
 import os
 
 
-def get_score(example_and_sense_similarity_set):
-
-    ex = example_and_sense_similarity_set["example"]
-    ssr = example_and_sense_similarity_set["sense_similarity_results"]
-
-    corrects = [ssr[i][1] for i in range(len(ssr)) if ssr[i][0] == ex[2]]
-    incorrects = [ssr[i][1] for i in range(len(ssr)) if ssr[i][0] != ex[2]]
-
-    return np.mean(corrects) - np.mean(incorrects)
-
-
-def get_rows_for_test_result(test_result) -> list:
-    return [
-        [
-            test_result["target_lemma"],
-            test_result["token_weighing_strategy"]
-            + " / "
-            + test_result["similarity_comparison_strategy"],
-            example_and_sense_set["example"][0],
-            example_and_sense_set["example"][1],
-            get_score(example_and_sense_set),
-        ]
-        for example_and_sense_set in test_result["examples_and_sense_similarities"]
-    ]
-
-
-def get_dataframe(test_results) -> pd.DataFrame:
-
-    flattened = [
-        row
-        for test_result in test_results
-        for row in get_rows_for_test_result(test_result)
-    ]
-
-    return pd.DataFrame(
-        flattened,
-        columns=[
-            "target_lemma",
-            "strategies",
-            "example_text",
-            "example_source",
-            "score",
-        ],
-    )
-
-
-def write_result_files(test_results, path_to_file_without_ext):
-
-    os.makedirs(os.path.dirname(f"{path_to_file_without_ext}.png"), exist_ok=True)
-    os.makedirs(os.path.dirname(f"{path_to_file_without_ext}.csv"), exist_ok=True)
-
-    df = get_dataframe(test_results)
-
-    create_png(df, f"{path_to_file_without_ext}.png")
-
-
-def create_png(df: pd.DataFrame, png_path: str):
+def write_result_files(results, columns_in_results, path_to_dir):
 
     rc("font", family="New Gulim")
 
-    lemmas = df["target_lemma"].unique()
-    strategies_values = df["strategies"].unique()
+    df = pd.DataFrame(results, columns=columns_in_results)
 
-    plt.figure(figsize=(12, 6))
+    write_all_lemma_files(df, path_to_dir)
+    write_aggregated_file(df, path_to_dir)
 
-    x = np.arange(len(lemmas))
-    width = 0.7 / len(strategies_values)
 
-    for i, strategy_set in enumerate(strategies_values):
-        strategy_data = df[df["strategies"] == strategy_set]
-        scores = [
-            strategy_data[strategy_data["target_lemma"] == lemma]["score"].iloc[0]
-            for lemma in lemmas
-        ]
+def write_all_lemma_files(df: pd.DataFrame, path_to_dir: str):
 
-        positions = x + (i - 0.5) * width
-        plt.bar(positions, scores, width, label=strategy_set)
+    combine_config_columns(df)
 
-    plt.xlabel("Lemmas")
-    plt.ylabel("Score")
-    plt.title("Comparison of Strategies Across Lemmas")
-    plt.xticks(x, lemmas)
-    plt.legend()
+    lemmas = df["lemma"].unique()
 
-    plt.grid(True, axis="y", linestyle="--", alpha=0.7)
+    for lemma in lemmas:
+        os.makedirs(os.path.dirname(f"{path_to_dir}/lemmas/{lemma}.png"), exist_ok=True)
 
-    plt.tight_layout()
+        data_for_lemma_df = df[df["lemma"] == lemma]
 
-    plt.savefig(png_path, dpi=300, bbox_inches="tight")
+        data_for_lemma_df.plot(
+            kind="bar",
+            title=f"Results for lemma {lemma}",
+            color="purple",
+            x="combined_config",
+            y="score",
+            xlabel="Configuration",
+            ylabel="Score",
+            figsize=(16, 8),
+            rot=0,
+        )
+        plt.savefig(f"{path_to_dir}/lemmas/{lemma}.png")
+        plt.close()
+
+
+def combine_config_columns(df: pd.DataFrame):
+
+    columns_to_combine = [
+        "definition_weight",
+        "known_usage_similarity_flattener",
+        "sense_similarity_flattener",
+        "definition_similarity_flattener",
+    ]
+
+    df["combined_config"] = df[columns_to_combine].astype("str").agg(" / ".join, axis=1)
+
+
+def write_aggregated_file(df: pd.DataFrame, path_to_dir: str):
+
+    combine_config_columns(df)
+
+    aggregated_df = df.groupby("combined_config")["score"].mean().reset_index()
+
+    os.makedirs(os.path.dirname(f"{path_to_dir}/aggregated.png"), exist_ok=True)
+
+    aggregated_df.plot(
+        kind="bar",
+        title="Aggregated results",
+        color="purple",
+        x="combined_config",
+        y="score",
+        xlabel="Configuration",
+        ylabel="Score",
+        figsize=(16, 8),
+        rot=0,
+    )
+
+    plt.savefig(f"{path_to_dir}/aggregated.png")
     plt.close()

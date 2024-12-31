@@ -2,8 +2,7 @@ from match_usage_sense_disambiguator import MatchingUsageHeadwordDisambiguator
 from similarity_flattener import MaxStrategy, AverageStrategy
 from test_types import Language, TestCaseForMatchingKnownUsages
 import sys
-from typing import List
-import numpy as np
+from typing import List, Tuple
 import os
 from run_single_test import read_from_file
 from itertools import product
@@ -11,27 +10,30 @@ from write_result_files import write_result_files
 
 all_configs = [
     # Definition weights tested
-    [0.0, 0.25, 0.5],
+    [0.0],
     # Known usage similarity flatteners tested
-    [MaxStrategy, AverageStrategy],
+    [MaxStrategy],
     # Sense similarity flatteners tested
-    [MaxStrategy, AverageStrategy],
+    [MaxStrategy],
     # Definition similarity flatteners tested
-    [MaxStrategy, AverageStrategy],
+    [MaxStrategy],
 ]
 config_combinations = product(*all_configs)
 
 
-def get_score(correct_headword_id: int, headword_similarities: List[float]) -> float:
+def get_score(
+    correct_headword_id: int, headword_similarities: List[Tuple[int, float]]
+) -> float:
 
-    correct_headword_similarity = headword_similarities[correct_headword_id]
-    incorrect_headword_similarities = [
-        headword_similarity
-        for index, headword_similarity in enumerate(headword_similarities)
-        if index != correct_headword_id
-    ]
+    correct_headword_similarity = headword_similarities[correct_headword_id][1]
 
-    return correct_headword_similarity - np.mean(incorrect_headword_similarities)
+    sum_of_incorrect = (
+        sum([headword_similarity[1] for headword_similarity in headword_similarities])
+    ) - correct_headword_similarity
+
+    average_of_incorrect = sum_of_incorrect / (len(headword_similarities) - 1)
+
+    return correct_headword_similarity - average_of_incorrect
 
 
 def run_all_examples_with_all_configs(
@@ -40,14 +42,21 @@ def run_all_examples_with_all_configs(
 ):
     results = []
 
+    columns_in_results = [
+        "lemma",
+        "definition_weight",
+        "known_usage_similarity_flattener",
+        "sense_similarity_flattener",
+        "definition_similarity_flattener",
+        "score",
+    ]
+
     for config_combination in config_combinations:
         sense_disambiguator = MatchingUsageHeadwordDisambiguator(
             language, *config_combination
         )
 
         for test_case in test_cases:
-
-            test_case_results = []
 
             for unknown_usage_example in test_case.unknown_usage_examples:
 
@@ -59,26 +68,21 @@ def run_all_examples_with_all_configs(
                     )
                 )
 
-                test_case_results.append(
-                    {
-                        "definition_weight": config_combination[0],
-                        "known_usage_similarity_flattener": config_combination[
-                            1
-                        ].__name__,
-                        "sense_similarity_flattener": config_combination[2].__name__,
-                        "definition_similarity_flattener": config_combination[
-                            3
-                        ].__name__,
-                        "score": get_score(
+                results.append(
+                    [
+                        test_case.lemma,
+                        config_combination[0],
+                        config_combination[1].__name__,
+                        config_combination[2].__name__,
+                        config_combination[3].__name__,
+                        get_score(
                             unknown_usage_example.index_of_correct_headword,
                             this_examples_similarities,
                         ),
-                    }
+                    ]
                 )
 
-            results.append(test_case_results)
-
-    return results
+    return results, columns_in_results
 
 
 def get_all_files_starting_in_dir(dir: str):
@@ -90,7 +94,7 @@ def get_all_files_starting_in_dir(dir: str):
 
         if os.path.isdir(joined_with_path):
             all_files.extend(get_all_files_starting_in_dir(joined_with_path))
-        elif os.path.splitext(file_or_dir)[1] == "json":
+        elif os.path.splitext(file_or_dir)[1] == ".json":
             all_files.append(joined_with_path)
 
     return all_files
@@ -106,13 +110,13 @@ def run_all_in_dir(dir: str, language: Language):
 
 
 def run_korean_tests():
-    results = run_all_in_dir("inputs/kor", "korean")
-    write_result_files(results, "test_results/kor")
+    results, columns_in_results = run_all_in_dir("inputs/kor", "korean")
+    write_result_files(results, columns_in_results, "test_results/kor")
 
 
 def run_english_tests():
-    results = run_all_in_dir("inputs/eng", "english")
-    write_result_files(results, "test_results/eng")
+    results, columns_in_results = run_all_in_dir("inputs/eng", "english")
+    write_result_files(results, columns_in_results, "test_results/eng")
 
 
 if __name__ == "__main__":
