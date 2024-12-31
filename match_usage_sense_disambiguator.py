@@ -3,6 +3,7 @@ from embedder import Embedder
 from similarity_calculator import SimilarityCalculator
 from similarity_flattener import SimilarityFlatteningStrategy
 from test_types import KnownHeadwordInformation, Language
+from usage_preprocessor import UsagePreprocessor
 
 
 class MatchingUsageHeadwordDisambiguator:
@@ -13,16 +14,27 @@ class MatchingUsageHeadwordDisambiguator:
         definition_weight: float,
         known_usage_similarity_flattener: SimilarityFlatteningStrategy,
         sense_similarity_flattener: SimilarityFlatteningStrategy,
+        definition_similarity_flattener: SimilarityFlatteningStrategy,
     ):
         self.definition_weight = definition_weight
         self.similarity_calculator = SimilarityCalculator(
-            known_usage_similarity_flattener, sense_similarity_flattener
+            known_usage_similarity_flattener,
+            sense_similarity_flattener,
+            definition_similarity_flattener,
         )
 
         if language == "korean":
             self.embedder = Embedder("klue/bert-base")
+            from lemmatizer import KoreanLemmatizer
+
+            self.usage_preprocessor = UsagePreprocessor(
+                KoreanLemmatizer(attach_다_to_verbs=True)
+            )
         else:
             self.embedder = Embedder("bert-base")
+            from lemmatizer import EnglishLemmatizer
+
+            self.usage_preprocessor = UsagePreprocessor(EnglishLemmatizer())
 
     def get_ranking_with_similarities(
         self,
@@ -44,7 +56,7 @@ class MatchingUsageHeadwordDisambiguator:
 
         # Get embeddings
 
-        definition_similarities = [0 * len(known_headwords)]
+        definition_similarities = [0] * len(known_headwords)
         # Should raw definitions be considered?
         if self.definition_weight > 0.0:
             average_token_embedding_for_unknown_usage = (
@@ -61,7 +73,7 @@ class MatchingUsageHeadwordDisambiguator:
                 )
             )
 
-        usage_similarities = [0 * len(known_headwords)]
+        usage_similarities = [0] * len(known_headwords)
         # Should unknown usages be considered?
         if 1 - self.definition_weight > 0.0:
 

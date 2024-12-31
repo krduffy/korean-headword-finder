@@ -1,13 +1,13 @@
 import re
-from typing import List, Tuple
+from typing import List
 from lemmatizer import Lemmatizer
-from test_types import KnownHeadwordInformation, KnownSenseInformation
+from test_types import KnownHeadwordInformation
 
 
 class UsagePreprocessor:
 
-    def __init__(self, lemmatizer_class: Lemmatizer):
-        self.lemmatizer = lemmatizer_class()
+    def __init__(self, lemmatizer):
+        self.lemmatizer = lemmatizer
 
     def get_tagged_unknown_usage(
         self,
@@ -61,9 +61,9 @@ class UsagePreprocessor:
     ) -> None:
 
         for headword in known_headwords:
+            for sense in headword["known_senses"]:
 
-            for sense in headword.known_senses:
-
-                for usage in sense.known_usages:
-
-                    usage = self._replace_curly_with_tgt(usage, target_lemma)
+                sense["known_usages"] = [
+                    self._replace_curly_with_tgt(usage, target_lemma)
+                    for usage in sense["known_usages"]
+                ]

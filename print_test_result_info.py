@@ -18,7 +18,7 @@ def get_similarity_score_color(similarity_score) -> str:
 
 def print_test_result_to_stream(
     example: UnknownUsageExample,
-    senses: List[str],
+    headwords: List[str],
     index_ranking: List[Tuple[int, float]],
     file: TextIO,
 ):
@@ -26,11 +26,11 @@ def print_test_result_to_stream(
     print("=" * 70, file=file)
     print(f"Unknown usage: {example.usage} | source: {example.source}", file=file)
 
-    for sensenum, similarity in index_ranking:
+    for headword_num, similarity in index_ranking:
         formatted_sense = (
-            f"{GREEN}{senses[sensenum]}{RESET}"
-            if sensenum == example.index_of_correct_sense
-            else senses[sensenum]
+            f"{GREEN}{headwords[headword_num]}{RESET}"
+            if headword_num == example.index_of_correct_headword
+            else headwords[headword_num]
         )
 
         formatted_similarity = (

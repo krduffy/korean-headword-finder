@@ -8,7 +8,7 @@ type Language = Literal["english", "korean"]
 class UnknownUsageExample:
     usage: str
     source: str
-    index_of_correct_sense: int
+    index_of_correct_headword: int
 
 
 @dataclass

@@ -9,23 +9,35 @@ class SimilarityCalculator:
         self,
         known_usage_similarity_flattener: SimilarityFlatteningStrategy,
         sense_similarity_flattener: SimilarityFlatteningStrategy,
+        definition_similarity_flattener: SimilarityFlatteningStrategy,
     ):
-        self.known_usage_similarity_flattener = known_usage_similarity_flattener
-        self.sense_similarity_flattener = sense_similarity_flattener
+        self.known_usage_similarity_flattener = known_usage_similarity_flattener()
+        self.sense_similarity_flattener = sense_similarity_flattener()
+        self.definition_similarity_flattener = definition_similarity_flattener()
 
     def _get_similarity_of_tensors(self, t1: torch.Tensor, t2: torch.Tensor) -> float:
-        return torch.cosine_similarity(t1, t2).item()
+        t1, t2 = t1.squeeze(0), t2.squeeze(0)
+        similarity = torch.cosine_similarity(t1, t2, dim=0)
+        return similarity.item()
 
     def get_similarities_of_sense_definitions(
         self,
         unknown_usage_embedding: torch.Tensor,
         sense_definition_embeddings: List[torch.Tensor],
     ) -> List[float]:
+        before_flattening = [
+            [
+                self._get_similarity_of_tensors(
+                    unknown_usage_embedding, definition_embedding
+                )
+                for definition_embedding in sense_definition_set_embeddings
+            ]
+            for sense_definition_set_embeddings in sense_definition_embeddings
+        ]
+
         return [
-            self._get_similarity_of_tensors(
-                unknown_usage_embedding, sense_definition_embedding
-            )
-            for sense_definition_embedding in sense_definition_embeddings
+            self.definition_similarity_flattener.flatten_to_single_score(similarities)
+            for similarities in before_flattening
         ]
 
     def get_similarities_of_sense_known_usages(

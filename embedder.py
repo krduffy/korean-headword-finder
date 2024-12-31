@@ -1,6 +1,6 @@
 from typing import List
 from transformers import BertTokenizer, BertModel
-from test_types import KnownUsagesForHeadword, KnownHeadwordInformation
+from test_types import KnownHeadwordInformation
 import torch
 
 
@@ -32,7 +32,7 @@ class Embedder:
         return torch.mean(tagged_embeddings, dim=0)
 
     def get_all_embeddings_for_known_usages(
-        self, known_usages: List[KnownUsagesForHeadword]
+        self, known_usages: List[List[str]]
     ) -> List[List[torch.Tensor]]:
         return [
             [
@@ -67,10 +67,22 @@ class Embedder:
     ) -> List[List[torch.Tensor]]:
         return [
             [
-                self.get_average_token_embedding(known_sense.definition)
-                for known_sense in headword.known_senses
+                self.get_average_token_embedding(known_sense["definition"])
+                for known_sense in headword["known_senses"]
             ]
             for headword in known_headwords
+        ]
+
+    def _get_embeddings_for_known_usages(
+        self, known_usages: List[str]
+    ) -> List[torch.Tensor]:
+
+        if len(known_usages) == 0:
+            return []
+
+        return [
+            self.get_embedding_from_tgt_marked_text(known_usage)
+            for known_usage in known_usages
         ]
 
     def get_lemma_embeddings_for_headword_sense_known_usages(
@@ -78,11 +90,8 @@ class Embedder:
     ) -> List[List[List[torch.Tensor]]]:
         return [
             [
-                [
-                    [self.get_embedding_from_tgt_marked_text(known_usage)]
-                    for known_usage in known_sense.known_usages
-                ]
-                for known_sense in headword.known_senses
+                self._get_embeddings_for_known_usages(known_sense["known_usages"])
+                for known_sense in headword["known_senses"]
             ]
             for headword in known_headwords
         ]
