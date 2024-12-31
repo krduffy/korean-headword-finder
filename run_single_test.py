@@ -1,13 +1,28 @@
+from typing import List
 from test_types import (
     TestCaseForMatchingKnownUsages,
     UnknownUsageExample,
     Language,
+    KnownHeadwordInformation,
 )
 import sys
-from similarity_flattener import AverageStrategy
+from similarity_flattener import AverageStrategy, MaxStrategy
 import json
+import re
 
 from print_test_result_info import print_test_result_to_stream
+
+
+def delete_sources_from_usages(
+    known_headwords: List[KnownHeadwordInformation],
+) -> None:
+
+    for headword in known_headwords:
+        for sense in headword["known_senses"]:
+
+            sense["known_usages"] = [
+                re.sub(r"≪.*≫", "", usage) for usage in sense["known_usages"]
+            ]
 
 
 def read_from_file_matching_known_usages(
@@ -25,6 +40,8 @@ def read_from_file_matching_known_usages(
         )
     except json.JSONDecodeError:
         raise Exception(f"JSON could not properly decode data in file {json_filename}")
+
+    delete_sources_from_usages(json_data["known_headwords"])
 
     return TestCaseForMatchingKnownUsages(
         lemma=json_data["lemma"],
@@ -46,7 +63,7 @@ def do_matching_usage_algorithm(
     from match_usage_sense_disambiguator import MatchingUsageHeadwordDisambiguator
 
     sd = MatchingUsageHeadwordDisambiguator(
-        language, 0.5, AverageStrategy, AverageStrategy, AverageStrategy
+        language, 0.0, AverageStrategy, MaxStrategy, AverageStrategy
     )
 
     for unknown_usage_example in test_case_data.unknown_usage_examples:
@@ -77,7 +94,7 @@ if __name__ == "__main__":
     #        """Usage: `python run_single_test.py <language> <filepath> <weighing policy class name> <match usage>`"""
     #    )
 
-    filepath = "inputs/kor/matching_usage/ignore/임종.json"
+    filepath = "inputs/kor/matching_usage/타다.json"
 
     test_case_data = read_from_file_matching_known_usages(filepath)
     do_matching_usage_algorithm(args[1], test_case_data)
