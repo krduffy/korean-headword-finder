@@ -115,7 +115,9 @@ if __name__ == "__main__":
         *[string_to_flattening_strategy(string) for string in args[4:7]],
     ]
 
-    filepath = "inputs/kor/타다.json"
+    print(disambiguator_args)
+
+    filepath = args[2]
 
     test_case_data = read_from_file(filepath)
     do_matching_usage_algorithm(disambiguator_args, test_case_data)

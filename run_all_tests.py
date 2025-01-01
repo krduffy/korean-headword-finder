@@ -1,12 +1,15 @@
+from headword_ranker import rank_headwords
 from match_usage_sense_disambiguator import MatchingUsageHeadwordDisambiguator
+from similarity_calculator import SimilarityCalculator
 from similarity_flattener import MaxStrategy, AverageStrategy
 from test_types import Language, TestCaseForMatchingKnownUsages
 import sys
-from typing import List, Tuple
+from typing import List
 import os
 from run_single_test import read_from_file
 from itertools import product
-from write_result_files import write_result_files
+from write_result_files import write_csv
+from get_score import get_score
 
 all_configs = [
     # Definition weights tested
@@ -18,22 +21,11 @@ all_configs = [
     # Definition similarity flatteners tested
     [MaxStrategy, AverageStrategy],
 ]
-config_combinations = product(*all_configs)
+config_combinations = list(product(*all_configs))
 
 
-def get_score(
-    correct_headword_id: int, headword_similarities: List[Tuple[int, float]]
-) -> float:
-
-    correct_headword_similarity = headword_similarities[correct_headword_id][1]
-
-    sum_of_incorrect = (
-        sum([headword_similarity[1] for headword_similarity in headword_similarities])
-    ) - correct_headword_similarity
-
-    average_of_incorrect = sum_of_incorrect / (len(headword_similarities) - 1)
-
-    return correct_headword_similarity - average_of_incorrect
+GREEN = "\033[32m"
+RESET = "\033[0m"
 
 
 def run_all_examples_with_all_configs(
@@ -41,6 +33,8 @@ def run_all_examples_with_all_configs(
     language: Language,
 ):
     results = []
+
+    sense_disambiguator = MatchingUsageHeadwordDisambiguator(language)
 
     columns_in_results = [
         "lemma",
@@ -51,21 +45,21 @@ def run_all_examples_with_all_configs(
         "score",
     ]
 
-    for config_combination in config_combinations:
-        sense_disambiguator = MatchingUsageHeadwordDisambiguator(
-            language, *config_combination
-        )
+    for test_case in test_cases:
 
-        for test_case in test_cases:
+        for unknown_usage_example in test_case.unknown_usage_examples:
 
-            for unknown_usage_example in test_case.unknown_usage_examples:
+            this_example_embeddings = sense_disambiguator.get_all_embeddings(
+                test_case.lemma, unknown_usage_example.usage, test_case.known_headwords
+            )
 
-                this_examples_similarities = (
-                    sense_disambiguator.get_ranking_with_similarities(
-                        test_case.lemma,
-                        unknown_usage_example.usage,
-                        test_case.known_headwords,
-                    )
+            for config_combination in config_combinations:
+
+                this_examples_similarities = rank_headwords(
+                    len(test_case.known_headwords),
+                    this_example_embeddings,
+                    config_combination[0],
+                    SimilarityCalculator(*config_combination[1:]),
                 )
 
                 results.append(
@@ -81,6 +75,10 @@ def run_all_examples_with_all_configs(
                         ),
                     ]
                 )
+
+        print(
+            f"{GREEN}Finished running simulations for lemma {test_case.lemma}.{RESET}"
+        )
 
     return results, columns_in_results
 
@@ -111,12 +109,12 @@ def run_all_in_dir(dir: str, language: Language):
 
 def run_korean_tests():
     results, columns_in_results = run_all_in_dir("inputs/kor", "korean")
-    write_result_files(results, columns_in_results, "test_results/kor")
+    write_csv(results, columns_in_results, "test_results/kor")
 
 
 def run_english_tests():
     results, columns_in_results = run_all_in_dir("inputs/eng", "english")
-    write_result_files(results, columns_in_results, "test_results/eng")
+    write_csv(results, columns_in_results, "test_results/eng")
 
 
 if __name__ == "__main__":

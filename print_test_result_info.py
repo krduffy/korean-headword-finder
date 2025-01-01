@@ -1,5 +1,6 @@
 from typing import List, TextIO, Tuple
 from test_types import UnknownUsageExample
+from get_score import get_score
 
 RED = "\033[31m"
 GREEN = "\033[32m"
@@ -39,4 +40,5 @@ def print_test_result_to_stream(
 
         print(f"{formatted_similarity} | {formatted_sense}", file=file)
 
+    print(f"\nScore is {get_score(example.index_of_correct_headword, index_ranking)}")
     print("=" * 70, file=file)
