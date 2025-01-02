@@ -16,10 +16,15 @@ class SimilarityFlatteningStrategy(ABC):
 class AverageStrategy(SimilarityFlatteningStrategy):
 
     def flatten_to_single_score(self, scores: List[float]) -> float:
-        if len(scores) < 1:
+        if len(scores) == 0:
             return self.similarity_for_empty_list
 
-        return np.mean(np.array(scores))
+        nonzeroes = [score for score in scores if score > 0.0]
+
+        if len(nonzeroes) < 1:
+            return 0.0
+
+        return np.mean(np.array(nonzeroes))
 
 
 class MaxStrategy(SimilarityFlatteningStrategy):

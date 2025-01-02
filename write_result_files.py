@@ -14,7 +14,7 @@ def write_pngs(path_to_dir):
     df = pd.read_csv(f"{path_to_dir}/aggregated.csv")
 
     rc("font", family="New Gulim")
-    combine_config_columns(df)
+    df = combine_config_columns(df)
 
     write_all_lemma_files(df, path_to_dir)
     write_aggregated_file(df, path_to_dir)
@@ -29,14 +29,20 @@ def write_all_lemma_files(df: pd.DataFrame, path_to_dir: str):
 
         data_for_lemma_df = df[df["lemma"] == lemma]
 
-        data_for_lemma_df = data_for_lemma_df.groupby("combined_config")["score"].mean()
+        data_for_lemma_df = add_correct_statistics(data_for_lemma_df)
+
+        data_for_lemma_df = data_for_lemma_df.groupby("combined_config")[
+            [
+                "correct_minus_average_incorrect",
+                "correct_minus_best_incorrect",
+                "proportion_of_times_correct_top",
+            ]
+        ].mean()
 
         data_for_lemma_df.plot(
             kind="bar",
             title=f"Results for '{lemma}'",
-            color="blue",
-            x="combined_config",
-            y="score",
+            color=["blue", "orange", "purple"],
             xlabel="Configuration",
             ylabel="Score",
             figsize=(16, 8),
@@ -46,6 +52,8 @@ def write_all_lemma_files(df: pd.DataFrame, path_to_dir: str):
 
 
 def combine_config_columns(df: pd.DataFrame):
+
+    new_df = df
 
     def format_config(column_config):
         return (
@@ -62,25 +70,55 @@ def combine_config_columns(df: pd.DataFrame):
         "definition_similarity_flattener",
     ]
 
-    df["combined_config"] = df[columns_to_combine].apply(format_config, axis=1)
+    new_df["combined_config"] = new_df[columns_to_combine].apply(format_config, axis=1)
+
+    return new_df
+
+
+def add_correct_statistics(df: pd.DataFrame) -> pd.DataFrame:
+    new_df = df
+
+    new_df["correct_minus_average_incorrect"] = df.groupby("combined_config")[
+        "correct_minus_average_incorrect"
+    ].transform("mean")
+
+    new_df["correct_minus_best_incorrect"] = df.groupby("combined_config")[
+        "correct_minus_best_incorrect"
+    ].transform("mean")
+
+    new_df["proportion_of_times_correct_top"] = df.groupby("combined_config")[
+        "correct_minus_best_incorrect"
+    ].transform(lambda item: (item > 0.0).mean())
+
+    return new_df
 
 
 def write_aggregated_file(df: pd.DataFrame, path_to_dir: str):
 
-    aggregated_df = df.groupby("combined_config")["score"].mean()
+    aggregated_df = add_correct_statistics(df)
 
     os.makedirs(os.path.dirname(f"{path_to_dir}/aggregated.png"), exist_ok=True)
+
+    aggregated_df = aggregated_df.groupby("combined_config")[
+        [
+            "correct_minus_average_incorrect",
+            "correct_minus_best_incorrect",
+            "proportion_of_times_correct_top",
+        ]
+    ].mean()
 
     aggregated_df.plot(
         kind="bar",
         title="Aggregated Results",
-        color="blue",
-        x="combined_config",
-        y="score",
+        color=["blue", "orange", "purple"],
         xlabel="Configuration",
-        ylabel="Score",
+        ylabel="Values",
         figsize=(16, 8),
     )
 
     plt.savefig(f"{path_to_dir}/aggregated.png")
     plt.close()
+
+
+if __name__ == "__main__":
+    write_pngs("test_results/kor")

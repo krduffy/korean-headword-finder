@@ -9,7 +9,7 @@ import os
 from run_single_test import read_from_file
 from itertools import product
 from write_result_files import write_csv
-from get_score import get_score
+from get_score import get_correct_minus_avg_incorrect, get_correct_minus_best_incorrect
 
 all_configs = [
     # Definition weights tested
@@ -42,7 +42,8 @@ def run_all_examples_with_all_configs(
         "known_usage_similarity_flattener",
         "sense_similarity_flattener",
         "definition_similarity_flattener",
-        "score",
+        "correct_minus_average_incorrect",
+        "correct_minus_best_incorrect",
     ]
 
     for test_case in test_cases:
@@ -69,7 +70,11 @@ def run_all_examples_with_all_configs(
                         config_combination[1].__name__,
                         config_combination[2].__name__,
                         config_combination[3].__name__,
-                        get_score(
+                        get_correct_minus_avg_incorrect(
+                            unknown_usage_example.index_of_correct_headword,
+                            this_examples_similarities,
+                        ),
+                        get_correct_minus_best_incorrect(
                             unknown_usage_example.index_of_correct_headword,
                             this_examples_similarities,
                         ),
@@ -84,6 +89,7 @@ def run_all_examples_with_all_configs(
 
 
 def get_all_files_starting_in_dir(dir: str):
+    return ["inputs/kor/ignore/사자.json"]
     all_files = []
 
     for file_or_dir in os.listdir(dir):
