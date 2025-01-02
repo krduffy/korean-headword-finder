@@ -1,5 +1,5 @@
 from typing import List, TextIO, Tuple
-from headword_chooser import HeadwordChooser
+from headword_chooser import choose_headword
 from test_types import UnknownUsageExample
 from get_score import get_correct_minus_avg_incorrect
 
@@ -45,7 +45,7 @@ def print_test_result_to_stream(
         f"\nCorrect - avg incorrect is {get_correct_minus_avg_incorrect(example.index_of_correct_headword, index_ranking)}"
     )
 
-    chosen = HeadwordChooser(0.5, 0.05).choose_headword(index_ranking)
+    chosen = choose_headword(index_ranking, min_acceptance=0.5, min_delta=0.05)
 
     if chosen is not None:
         was_correct = chosen == example.index_of_correct_headword

@@ -1,27 +1,24 @@
 from typing import List, Tuple
 
 
-class HeadwordChooser:
+def choose_headword(
+    descending_ranking: List[Tuple[int, float]],
+    *,
+    min_acceptance: float,
+    min_delta: float
+) -> int | None:
 
-    def __init__(self, min_acceptance: float, min_delta: float):
-        self.min_acceptance = min_acceptance
-        self.min_delta = min_delta
+    if len(descending_ranking) == 1:
+        return 0
 
-    def choose_headword(
-        self, descending_ranking: List[Tuple[int, float]]
-    ) -> int | None:
+    top_similarity = descending_ranking[0][1]
 
-        if len(descending_ranking) == 1:
-            return 0
+    if top_similarity < min_acceptance:
+        return None
 
-        top_similarity = descending_ranking[0][1]
+    delta = top_similarity - descending_ranking[1][1]
 
-        if top_similarity < self.min_acceptance:
-            return None
+    if delta < min_delta:
+        return None
 
-        delta = top_similarity - descending_ranking[1][1]
-
-        if delta < self.min_delta:
-            return None
-
-        return descending_ranking[0][0]
+    return descending_ranking[0][0]

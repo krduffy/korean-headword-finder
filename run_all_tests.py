@@ -1,3 +1,4 @@
+from headword_chooser import choose_headword
 from headword_ranker import rank_headwords
 from match_usage_sense_disambiguator import MatchingUsageHeadwordDisambiguator
 from similarity_calculator import SimilarityCalculator
@@ -23,6 +24,8 @@ all_configs = [
 ]
 config_combinations = list(product(*all_configs))
 
+all_choice_values = [[0.4, 0.5, 0.6], [0.025, 0.05, 0.075, 0.1]]
+choice_values_combinations = list(product(*all_choice_values))
 
 GREEN = "\033[32m"
 RESET = "\033[0m"
@@ -44,6 +47,9 @@ def run_all_examples_with_all_configs(
         "definition_similarity_flattener",
         "correct_minus_average_incorrect",
         "correct_minus_best_incorrect",
+        "min_acceptance",
+        "min_delta",
+        "choice_result",
     ]
 
     for test_case in test_cases:
@@ -63,23 +69,47 @@ def run_all_examples_with_all_configs(
                     SimilarityCalculator(*config_combination[1:]),
                 )
 
-                results.append(
-                    [
-                        test_case.lemma,
-                        config_combination[0],
-                        config_combination[1].__name__,
-                        config_combination[2].__name__,
-                        config_combination[3].__name__,
-                        get_correct_minus_avg_incorrect(
-                            unknown_usage_example.index_of_correct_headword,
-                            this_examples_similarities,
-                        ),
-                        get_correct_minus_best_incorrect(
-                            unknown_usage_example.index_of_correct_headword,
-                            this_examples_similarities,
-                        ),
-                    ]
+                correct_minus_avg_incorrect = get_correct_minus_avg_incorrect(
+                    unknown_usage_example.index_of_correct_headword,
+                    this_examples_similarities,
                 )
+                correct_minus_best_incorrect = (
+                    get_correct_minus_best_incorrect(
+                        unknown_usage_example.index_of_correct_headword,
+                        this_examples_similarities,
+                    ),
+                )
+
+                for choice_values in choice_values_combinations:
+                    chosen_index = choose_headword(
+                        this_examples_similarities,
+                        min_acceptance=choice_values[0],
+                        min_delta=choice_values[1],
+                    )
+
+                    if chosen_index is None:
+                        choice_result = 0
+                    elif (
+                        chosen_index == unknown_usage_example.index_of_correct_headword
+                    ):
+                        choice_result = 1
+                    else:
+                        choice_result = -1
+
+                    results.append(
+                        [
+                            test_case.lemma,
+                            config_combination[0],
+                            config_combination[1].__name__,
+                            config_combination[2].__name__,
+                            config_combination[3].__name__,
+                            correct_minus_avg_incorrect,
+                            correct_minus_best_incorrect,
+                            choice_values[0],
+                            choice_values[1],
+                            choice_result,
+                        ]
+                    )
 
         print(
             f"{GREEN}Finished running simulations for lemma {test_case.lemma}.{RESET}"
