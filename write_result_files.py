@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rc
 import os
+import plotly.express as px
 
 
 def write_csv(results, columns_in_results, path_to_dir):
@@ -18,6 +19,7 @@ def write_pngs(path_to_dir):
 
     write_all_lemma_files(df, path_to_dir)
     write_aggregated_file(df, path_to_dir)
+    write_choice_result_scatter_plot(df.copy(), path_to_dir)
 
 
 def write_all_lemma_files(df: pd.DataFrame, path_to_dir: str):
@@ -38,13 +40,13 @@ def write_all_lemma_files(df: pd.DataFrame, path_to_dir: str):
             ]
         ].mean()
 
-        do_plot(data_for_lemma_df, f"Results for {lemma}")
+        do_bar_plot(data_for_lemma_df, f"Results for {lemma}")
 
         plt.savefig(f"{path_to_dir}/lemmas/{lemma}.png")
         plt.close()
 
 
-def do_plot(df, title: str):
+def do_bar_plot(df, title: str):
     df.plot(
         kind="bar",
         title=title,
@@ -117,10 +119,83 @@ def write_aggregated_file(df: pd.DataFrame, path_to_dir: str):
         ]
     ].mean()
 
-    do_plot(aggregated_df, "Aggregated Results")
+    do_bar_plot(aggregated_df, "Aggregated Results")
 
     plt.savefig(f"{path_to_dir}/aggregated.png")
     plt.close()
+
+
+def combine_config_plus_choice_value_columns(df: pd.DataFrame) -> pd.DataFrame:
+
+    new_df = df.copy()
+
+    def format_column(column_config):
+        return (
+            f"{column_config['definition_weight']}"
+            + f"/{column_config['known_usage_similarity_flattener'][0]}"
+            + f"/{column_config['sense_similarity_flattener'][0]}"
+            + f"/{column_config['definition_similarity_flattener'][0]}"
+            + f"/{column_config['min_acceptance']}"
+            + f"/{column_config['min_delta']}"
+        )
+
+    columns_to_combine = [
+        "definition_weight",
+        "known_usage_similarity_flattener",
+        "sense_similarity_flattener",
+        "definition_similarity_flattener",
+        "min_acceptance",
+        "min_delta",
+    ]
+
+    new_df["combined_config_and_choice_values"] = new_df[columns_to_combine].apply(
+        format_column, axis=1
+    )
+
+    return new_df
+
+
+def add_choice_result_statistics(df: pd.DataFrame) -> pd.DataFrame:
+
+    new_df = df.copy()
+
+    new_df["proportion_of_times_choice_made"] = df.groupby(
+        "combined_config_and_choice_values"
+    )["choice_result"].transform(lambda choice_result: (choice_result != 0).mean())
+
+    new_df["proportion_of_choices_correct"] = df.groupby(
+        "combined_config_and_choice_values"
+    )["choice_result"].transform(
+        lambda choice_result: (choice_result == 1).sum()
+        / ((choice_result == 1).sum() + (choice_result == -1).sum())
+    )
+
+    return new_df
+
+
+def write_choice_result_scatter_plot(df: pd.DataFrame, path_to_dir: str):
+
+    df = combine_config_plus_choice_value_columns(df)
+    df = add_choice_result_statistics(df)
+
+    # has no labels
+    df.plot(
+        kind="scatter",
+        x="proportion_of_times_choice_made",
+        y="proportion_of_choices_correct",
+    )
+    plt.savefig(f"{path_to_dir}/choice_result_scatter_plot.png")
+    plt.close()
+
+    plot = px.scatter(
+        df,
+        x="proportion_of_times_choice_made",
+        y="proportion_of_choices_correct",
+        hover_data="combined_config_and_choice_values",
+        title="Choice Results",
+    )
+
+    plot.write_html(f"{path_to_dir}/choice_result_scatter_plot.html")
 
 
 if __name__ == "__main__":

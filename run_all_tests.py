@@ -73,11 +73,9 @@ def run_all_examples_with_all_configs(
                     unknown_usage_example.index_of_correct_headword,
                     this_examples_similarities,
                 )
-                correct_minus_best_incorrect = (
-                    get_correct_minus_best_incorrect(
-                        unknown_usage_example.index_of_correct_headword,
-                        this_examples_similarities,
-                    ),
+                correct_minus_best_incorrect = get_correct_minus_best_incorrect(
+                    unknown_usage_example.index_of_correct_headword,
+                    this_examples_similarities,
                 )
 
                 for choice_values in choice_values_combinations:
