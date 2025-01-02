@@ -1,4 +1,6 @@
 from typing import List
+from headword_ranker import rank_headwords
+from similarity_calculator import SimilarityCalculator
 from test_types import (
     TestCaseForMatchingKnownUsages,
     UnknownUsageExample,
@@ -62,14 +64,21 @@ def do_matching_usage_algorithm(
 ):
     from match_usage_sense_disambiguator import MatchingUsageHeadwordDisambiguator
 
-    sd = MatchingUsageHeadwordDisambiguator(*disambiguator_args)
+    sd = MatchingUsageHeadwordDisambiguator(disambiguator_args[0])
 
     for unknown_usage_example in test_case_data.unknown_usage_examples:
 
-        res = sd.get_ranking_with_similarities(
+        embeddings = sd.get_all_embeddings(
             test_case_data.lemma,
             unknown_usage_example.usage,
             test_case_data.known_headwords,
+        )
+
+        headword_rankings = rank_headwords(
+            len(test_case_data.known_headwords),
+            embeddings,
+            disambiguator_args[1],
+            SimilarityCalculator(*disambiguator_args[2:]),
         )
 
         print_test_result_to_stream(
@@ -78,7 +87,7 @@ def do_matching_usage_algorithm(
                 headword["known_senses"][0]["definition"]
                 for headword in test_case_data.known_headwords
             ],
-            res,
+            headword_rankings,
             sys.stdout,
         )
 
@@ -114,8 +123,6 @@ if __name__ == "__main__":
         float(args[3]),
         *[string_to_flattening_strategy(string) for string in args[4:7]],
     ]
-
-    print(disambiguator_args)
 
     filepath = args[2]
 

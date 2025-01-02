@@ -89,7 +89,6 @@ def run_all_examples_with_all_configs(
 
 
 def get_all_files_starting_in_dir(dir: str):
-    return ["inputs/kor/ignore/사자.json"]
     all_files = []
 
     for file_or_dir in os.listdir(dir):

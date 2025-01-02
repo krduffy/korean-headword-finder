@@ -35,7 +35,6 @@ def write_all_lemma_files(df: pd.DataFrame, path_to_dir: str):
             [
                 "correct_minus_average_incorrect",
                 "correct_minus_best_incorrect",
-                "proportion_of_times_correct_top",
             ]
         ].mean()
 
@@ -64,7 +63,7 @@ def do_plot(df, title: str):
 
 def combine_config_columns(df: pd.DataFrame):
 
-    new_df = df
+    new_df = df.copy()
 
     def format_config(column_config):
         return (
@@ -87,7 +86,7 @@ def combine_config_columns(df: pd.DataFrame):
 
 
 def add_correct_statistics(df: pd.DataFrame) -> pd.DataFrame:
-    new_df = df
+    new_df = df.copy()
 
     new_df["correct_minus_average_incorrect"] = df.groupby("combined_config")[
         "correct_minus_average_incorrect"
