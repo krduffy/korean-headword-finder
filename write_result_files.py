@@ -39,16 +39,27 @@ def write_all_lemma_files(df: pd.DataFrame, path_to_dir: str):
             ]
         ].mean()
 
-        data_for_lemma_df.plot(
-            kind="bar",
-            title=f"Results for '{lemma}'",
-            color=["blue", "orange", "purple"],
-            xlabel="Configuration",
-            ylabel="Score",
-            figsize=(16, 8),
-        )
+        do_plot(data_for_lemma_df, f"Results for {lemma}")
+
         plt.savefig(f"{path_to_dir}/lemmas/{lemma}.png")
         plt.close()
+
+
+def do_plot(df, title: str):
+    df.plot(
+        kind="bar",
+        title=title,
+        color=["#2ecc71", "#e74c3c", "#3498db"],
+        xlabel="Configuration",
+        ylabel="Score",
+        figsize=(16, 8),
+        rot=30,
+    )
+
+    plt.gca().spines["top"].set_visible(False)
+    plt.gca().spines["right"].set_visible(False)
+
+    plt.tight_layout()
 
 
 def combine_config_columns(df: pd.DataFrame):
@@ -107,14 +118,7 @@ def write_aggregated_file(df: pd.DataFrame, path_to_dir: str):
         ]
     ].mean()
 
-    aggregated_df.plot(
-        kind="bar",
-        title="Aggregated Results",
-        color=["blue", "orange", "purple"],
-        xlabel="Configuration",
-        ylabel="Values",
-        figsize=(16, 8),
-    )
+    do_plot(aggregated_df, "Aggregated Results")
 
     plt.savefig(f"{path_to_dir}/aggregated.png")
     plt.close()

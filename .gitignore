@@ -2,3 +2,6 @@ venv
 __pycache__
 ignore
 **/*.csv
+test_results/kor/lemmas/*.png
+!test_results/kor/lemmas/타다.png
+!test_results/kor/lemmas/다리.png
