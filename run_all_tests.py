@@ -14,7 +14,7 @@ from get_score import get_correct_minus_avg_incorrect, get_correct_minus_best_in
 
 all_configs = [
     # Definition weights tested
-    [0.0, 0.1, 0.2],
+    [0.0, 0.25, 0.5, 0.75],
     # Known usage similarity flatteners tested
     [MaxStrategy, AverageStrategy],
     # Sense similarity flatteners tested
@@ -24,7 +24,10 @@ all_configs = [
 ]
 config_combinations = list(product(*all_configs))
 
-all_choice_values = [[0.4, 0.5, 0.6], [0.025, 0.05, 0.075, 0.1]]
+all_choice_values = [
+    [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7],
+    [0.0, 0.025, 0.05, 0.075, 0.1],
+]
 choice_values_combinations = list(product(*all_choice_values))
 
 GREEN = "\033[32m"
