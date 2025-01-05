@@ -199,4 +199,4 @@ def write_choice_result_scatter_plot(df: pd.DataFrame, path_to_dir: str):
 
 
 if __name__ == "__main__":
-    write_pngs("test_results/kor")
+    write_pngs("test_results/kor/second-iteration")

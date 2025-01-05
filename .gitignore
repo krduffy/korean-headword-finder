@@ -5,4 +5,4 @@ ignore
 test_results/kor/lemmas/*.png
 !test_results/kor/lemmas/타다.png
 !test_results/kor/lemmas/다리.png
-test_results/kor/choice_result_scatter_plot.html
+choice_result_scatter_plot.html
