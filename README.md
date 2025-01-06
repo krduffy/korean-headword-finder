@@ -56,7 +56,16 @@ The third `max` means that the best definition is used for each headword.
 In this case, the headword for an animal pen was over the `min acceptance` score (0.61 > 0.5) and the difference between it and second place was at least `min delta` (0.12 > 0.05), so it is confident that that headword is the correct one.
 
 
+## Results
 
+![a](test_results/kor/initial/aggregated.png)
+
+In this graph, the x axis shows the specific configuration with regards to the weight of sense definitions and the three arguments for turning lists of scores for headwords' examples and definitions into a single score.
+
+As shown,
+- all configurations in which the example usage similarities are averaged for a sense perform consistently worse.
+- weighting the definitions very low (at 0%) increases the average margin at which the correct headword is chosen, but also decreases the accuracy of picking the correct headword.
+- averaging both the sets of example usages and the sets of definitions performs worse than maxing at least one of them.
 
 
 
