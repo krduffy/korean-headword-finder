@@ -111,7 +111,7 @@ if __name__ == "__main__":
             <filepath> 
             <definition_weight>
             <known_usage_similarity_flattener>
-            <sense_similarity_flattener>
+            <known_usage_second_similarity_flattener>
             <definition_similarity_flatten>`"""
         )
 

@@ -1,0 +1,42 @@
+{
+  "lemma": "pen",
+  "known_headwords": [
+    {
+      "known_senses": [
+        {
+          "definition": "A tool, originally made from a feather but now usually a small tubular instrument, containing ink used to write or make marks.",
+          "known_usages": ["He took notes with a {pen}."]
+        },
+        {
+          "definition": "A writer, or their style.",
+          "known_usages": ["He has a sharp {pen}."]
+        },
+        {
+          "definition": "Marks of ink left by a pen.",
+          "known_usages": "He's unhappy because he got {pen} on his new shirt."
+        }
+      ]
+    },
+    {
+      "known_senses": [
+        {
+          "definition": "An enclosure (enclosed area) used to contain domesticated animals, especially sheep or cattle.",
+          "known_usages": ["There are two steers in the third {pen}."]
+        },
+        {
+          "definition": "A penitentiary, i.e. a state or federal prison for convicted felons.",
+          "known_usages": [
+            "They caught him with a stolen horse, and he wound up in the {pen} again."
+          ]
+        }
+      ]
+    }
+  ],
+  "unknown_usage_examples": [
+    {
+      "usage": "After putting the cows back into their pen, the farmer worked on repairing the part of the fence they had broken through.",
+      "source": "me",
+      "index_of_correct_headword": 1
+    }
+  ]
+}

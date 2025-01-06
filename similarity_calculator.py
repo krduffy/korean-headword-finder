@@ -8,11 +8,11 @@ class SimilarityCalculator:
     def __init__(
         self,
         known_usage_similarity_flattener: SimilarityFlatteningStrategy,
-        sense_similarity_flattener: SimilarityFlatteningStrategy,
+        known_usage_second_similarity_flattener: SimilarityFlatteningStrategy,
         definition_similarity_flattener: SimilarityFlatteningStrategy,
     ):
         self.known_usage_similarity_flattener = known_usage_similarity_flattener()
-        self.sense_similarity_flattener = sense_similarity_flattener()
+        self.known_usage_second_similarity_flattener = known_usage_second_similarity_flattener()
         self.definition_similarity_flattener = definition_similarity_flattener()
 
     def _get_similarity_of_tensors(self, t1: torch.Tensor, t2: torch.Tensor) -> float:
@@ -70,7 +70,7 @@ class SimilarityCalculator:
 
             # Flatten sense similarities for this headword.
             headword_similarity = (
-                self.sense_similarity_flattener.flatten_to_single_score(
+                self.known_usage_second_similarity_flattener.flatten_to_single_score(
                     sense_similarities
                 )
             )

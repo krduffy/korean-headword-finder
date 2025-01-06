@@ -71,14 +71,14 @@ def combine_config_columns(df: pd.DataFrame):
         return (
             f"{column_config['definition_weight']}"
             + f"/{column_config['known_usage_similarity_flattener'][0]}"
-            + f"/{column_config['sense_similarity_flattener'][0]}"
+            + f"/{column_config['known_usage_second_similarity_flattener'][0]}"
             + f"/{column_config['definition_similarity_flattener'][0]}"
         )
 
     columns_to_combine = [
         "definition_weight",
         "known_usage_similarity_flattener",
-        "sense_similarity_flattener",
+        "known_usage_second_similarity_flattener",
         "definition_similarity_flattener",
     ]
 
@@ -133,7 +133,7 @@ def combine_config_plus_choice_value_columns(df: pd.DataFrame) -> pd.DataFrame:
         return (
             f"{column_config['definition_weight']}"
             + f"/{column_config['known_usage_similarity_flattener'][0]}"
-            + f"/{column_config['sense_similarity_flattener'][0]}"
+            + f"/{column_config['known_usage_second_similarity_flattener'][0]}"
             + f"/{column_config['definition_similarity_flattener'][0]}"
             + f"/{column_config['min_acceptance']}"
             + f"/{column_config['min_delta']}"
@@ -142,7 +142,7 @@ def combine_config_plus_choice_value_columns(df: pd.DataFrame) -> pd.DataFrame:
     columns_to_combine = [
         "definition_weight",
         "known_usage_similarity_flattener",
-        "sense_similarity_flattener",
+        "known_usage_second_similarity_flattener",
         "definition_similarity_flattener",
         "min_acceptance",
         "min_delta",

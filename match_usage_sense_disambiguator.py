@@ -19,7 +19,7 @@ class MatchingUsageHeadwordDisambiguator:
                 KoreanLemmatizer(attach_다_to_verbs=True)
             )
         else:
-            self.embedder = Embedder("bert-base")
+            self.embedder = Embedder("bert-base-uncased")
             from lemmatizer import EnglishLemmatizer
 
             self.usage_preprocessor = UsagePreprocessor(EnglishLemmatizer())
