@@ -35,7 +35,23 @@ Multiple parameters needed to be tested to find a suitable model for my use case
 - How to "score" the similarity of a headword given all of the scores of its senses, each with a definition and list of example usages
 - When to confidently return a specific headword vs. return nothing
 
-Here is an example output from running the model on an English sentence with the word 'pen':
+Consider an example with the English word 'pen', with two headwords:
+
+Headword 1
+- Sense 1: A tool, originally made from a feather but now usually a small tubular instrument, containing ink used to write or make marks.
+  - Example 1: He took notes with a {pen}.
+- Sense 2: A writer, or their style.
+  - Example 1: He has a sharp {pen}.
+- Sense 3: Marks of ink left by a pen.
+  - Example 1: He's unhappy because he got {pen} on his new shirt.   
+
+Headword 2
+- Sense 1: An enclosure (enclosed area) used to contain domesticated animals, especially sheep or cattle.
+  - Example 1: There are two steers in the third {pen}.
+- Sense 2: A penitentiary, i.e. a state or federal prison for convicted felons.
+  - Example 1: They caught him with a stolen horse, and he wound up in the {pen} again. 
+
+Here is an example output from running the model on a sentence I wrote with the word 'pen':
 ```
 $ python run_single_test.py english inputs/eng/pen.json 0.2 average max max 
 ======================================================================
