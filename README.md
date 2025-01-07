@@ -58,7 +58,7 @@ In this case, the headword for an animal pen was over the `min acceptance` score
 
 ## Results
 
-![a](test_results/kor/initial/aggregated.png)
+![Aggregated results by configuration](test_results/kor/initial/aggregated.png)
 
 In this graph, the x axis shows the specific configuration with regards to the weight of sense definitions and the three arguments for turning lists of scores for headwords' examples and definitions into a single score.
 
@@ -66,6 +66,25 @@ As shown,
 - all configurations in which the example usage similarities are averaged for a sense perform consistently worse.
 - weighting the definitions very low (at 0%) increases the average margin at which the correct headword is chosen, but also decreases the accuracy of picking the correct headword.
 - averaging both the sets of example usages and the sets of definitions performs worse than maxing at least one of them.
+
+![Choice results for each configuration with selected point](test_results/kor/second-iteration/choice_results_with_selected_point.png)
+
+This is a plot I created after running the tests from the picture above. Each point is a specific configuration combined with a specific `min_acceptance` and `min_delta` value.
+
+For each point, the return rate (x axis) and proportion of returns that returned the correct headword (y axis) is returned. There is a negative correlation between the two, expected since higher return rates are the result of being less cautious with when something is returned.
+
+Since the goal is to return as often as possible without being wrong too often, I decided that the point indicated in the graph by the arrow is a good median between returning a headword often enough to be useful and with enough accuracy. It is for the configuration `0.2/M/M/A/0.3/0.1`, meaning:
+- definitions have a weight of 0.2,
+- the best example sentence is taken from a sense's examples,
+- the best set of example sentences is used for a headword,
+- the definitions for a headword are averaged,
+- a headword must have at least a score of 0.3 to be returned, and
+- the delta between the first and second place headword must be at least 0.1 for the first to be returned.
+
+This has a return rate of 45.4% and an accuracy of 93.9% (**for these intentionally ambiguous examples**).
+
+For the average lemma, it is a good policy since it is heavily biased toward headword with example sentences. This means that it will for those cases almost always pick the common headword if only one is common.
+
 
 
 
