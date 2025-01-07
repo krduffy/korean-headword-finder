@@ -83,13 +83,13 @@ As shown,
 - weighting the definitions very low (at 0%) increases the average margin at which the correct headword is chosen, but also decreases the accuracy of picking the correct headword.
 - averaging both the sets of example usages and the sets of definitions performs worse than maxing at least one of them.
 
-![Choice results for each configuration with selected point](test_results/kor/second-iteration/choice_results_with_selected_point.png)
+![Choice results for each configuration](test_results/kor/second-iteration/choice_result_scatter_plot.png)
 
 This is a plot I created after running the tests from the picture above. Each point is a specific configuration combined with a specific `min_acceptance` and `min_delta` value.
 
 For each point, the return rate (x axis) and proportion of returns that returned the correct headword (y axis) is returned. There is a negative correlation between the two, expected since higher return rates are the result of being less cautious with when something is returned.
 
-Since the goal is to return as often as possible without being wrong too often, I decided that the point indicated in the graph by the arrow is a good median between returning a headword often enough to be useful and with enough accuracy. It is for the configuration `0.2/M/M/A/0.3/0.1`, meaning:
+Since the goal is to return as often as possible without being wrong too often, I chose a point in the graph that is a good median between returning a headword often enough to be useful and with enough accuracy. It is for the configuration `0.2/M/M/A/0.3/0.1`, meaning:
 - definitions have a weight of 0.2,
 - the best example sentence is taken from a sense's examples,
 - the best set of example sentences is used for a headword,
