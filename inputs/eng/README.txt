@@ -1,11 +1,8 @@
-Senses are from wiktionary
 
-A file is formatted as such:
-1 line: Number of senses
-Next lines: Senses
-1 line: Number of examples
-Next lines: Examples
-For each example, three lines:
-1. Example text
-2. Source
-3. Correct sense (0-indexed)
+For this english word, the senses are all from Wiktionary.
+This includes definitions and example usages.
+https://en.wiktionary.org/wiki/pen
+
+Because it is just a demonstration for the main README, I excluded most
+of the senses in favor of the word "pen"'s main senses.
+
