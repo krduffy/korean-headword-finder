@@ -119,6 +119,8 @@ For the average lemma, it is a good policy since it is heavily biased toward hea
 
 All of the models and source codes used in this project are used as-is and without modification.
 
+Both of the images in this README and all other `png` files in this repository were created using [matplotlib](https://github.com/matplotlib/matplotlib).
+
 ## License
 
 This project is licensed under an Apache 2.0 license. See [LICENSE](LICENSE) for details.
