@@ -101,8 +101,16 @@ This has a return rate of 45.4% and an accuracy of 93.9% (**for these intentiona
 
 For the average lemma, it is a good policy since it is heavily biased toward headword with example sentences. This means that it will for those cases almost always pick the common headword if only one is common.
 
+## Relevant Repositories
+
+[python-mecab-ko](https://github.com/jonghwanhyeon/python-mecab-ko): Korean lemmatization
+[KoBERT](https://github.com/SKTBrain/KoBERT): Korean text embedding
+[spaCy](https://github.com/explosion/spaCy): English lemmatization
+[BERT](https://github.com/google-research/bert): English text embedding
+
+All of the models and source codes used in this project are used as-is and without modification.
+
+## License
 
 
-
-
-
+This project is licensed under an Apache 2.0 license. See [LICENSE](LICENSE) for details.
