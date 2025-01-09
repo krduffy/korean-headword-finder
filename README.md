@@ -7,10 +7,10 @@ The goal of this project is to create a tool for finding which of a set of headw
 Users need to be able to input text and have words used in that text automatically derived and added to the correct dictionary entries. This requires finding a list of the
 dictionary words (lemmas) in the text and which of the meanings of the word (headword) is specifically being used in the text.
 
-Headwords are made up of multiple senses. For example, [Wikipedia](https://en.wikipedia.org/wiki/Lemma_(morphology)#Headword) uses the headword 'bread' with senses for the 
+Headwords are made up of multiple senses. For example, [Wikipedia](<https://en.wikipedia.org/wiki/Lemma_(morphology)#Headword>) uses the headword 'bread' with senses for the
 food 'bread' and another for money 'bread'. Because these senses fundamentally describe the same thing (one is just idiomatic), they are under the same headword.
 
-This is similar to [word-sense disambiguation](https://en.wikipedia.org/wiki/Word-sense_disambiguation) but for my purposes I only need to find which headword is being used, 
+This is similar to [word-sense disambiguation](https://en.wikipedia.org/wiki/Word-sense_disambiguation) but for my purposes I only need to find which headword is being used,
 which makes things easier.
 
 ## Process
@@ -31,6 +31,7 @@ the sentences. Example sentences compare the embeddings for the specific lemma b
 definition does not contain the word (if it's a good definition).
 
 Multiple parameters needed to be tested to find a suitable model for my use case. These include:
+
 - The weighted importances of definition similarity vs. example usage similarity
 - How to "score" the similarity of a headword given all of the scores of its senses, each with a definition and list of example usages
 - When to confidently return a specific headword vs. return nothing
@@ -38,22 +39,25 @@ Multiple parameters needed to be tested to find a suitable model for my use case
 Consider an example with the English word 'pen', with two headwords:
 
 Headword 1
+
 - Sense 1: A tool, originally made from a feather but now usually a small tubular instrument, containing ink used to write or make marks.
   - Example 1: He took notes with a {pen}.
 - Sense 2: A writer, or their style.
   - Example 1: He has a sharp {pen}.
 - Sense 3: Marks of ink left by a pen.
-  - Example 1: He's unhappy because he got {pen} on his new shirt.   
+  - Example 1: He's unhappy because he got {pen} on his new shirt.
 
 Headword 2
+
 - Sense 1: An enclosure (enclosed area) used to contain domesticated animals, especially sheep or cattle.
   - Example 1: There are two steers in the third {pen}.
 - Sense 2: A penitentiary, i.e. a state or federal prison for convicted felons.
-  - Example 1: They caught him with a stolen horse, and he wound up in the {pen} again. 
+  - Example 1: They caught him with a stolen horse, and he wound up in the {pen} again.
 
 Here is an example output from running the model on a sentence I wrote with the word 'pen':
+
 ```
-$ python run_single_test.py english inputs/eng/pen.json 0.2 average max max 
+$ python run_single_test.py english inputs/eng/pen.json 0.2 average max max
 ======================================================================
 Unknown usage: After putting the cows back into their pen, the farmer worked on repairing the part of the fence they had broken through. | source: me
 0.61609 | An enclosure (enclosed area) used to contain domesticated animals, especially sheep or cattle.
@@ -63,6 +67,7 @@ Correct - avg incorrect is 0.12275516986846924
 Chosen index (min acceptance 0.5, min delta 0.05) is 1
 ======================================================================
 ```
+
 The argument `0.2` is the weight of sense definitions (so `0.8` is the weight of sense example usages).
 The next three arguments are for turning lists of similarities into single scores.
 The first `average` means that the score of a list of sense example usages is their average.
@@ -71,7 +76,6 @@ The third `max` means that the best definition is used for each headword.
 
 In this case, the headword for an animal pen was over the `min acceptance` score (0.61 > 0.5) and the difference between it and second place was at least `min delta` (0.12 > 0.05), so it is confident that that headword is the correct one.
 
-
 ## Results
 
 ![Aggregated results by configuration](test_results/kor/initial/aggregated.png)
@@ -79,6 +83,7 @@ In this case, the headword for an animal pen was over the `min acceptance` score
 In this graph, the x axis shows the specific configuration with regards to the weight of sense definitions and the three arguments for turning lists of scores for headwords' examples and definitions into a single score.
 
 As shown,
+
 - all configurations in which the example usage similarities are averaged for a sense perform consistently worse.
 - weighting the definitions very low (at 0%) increases the average margin at which the correct headword is chosen, but also decreases the accuracy of picking the correct headword.
 - averaging both the sets of example usages and the sets of definitions performs worse than maxing at least one of them.
@@ -90,6 +95,7 @@ This is a plot I created after running the tests from the picture above. Each po
 For each point, the return rate (x axis) and proportion of returns that returned the correct headword (y axis) is returned. There is a negative correlation between the two, expected since higher return rates are the result of being less cautious with when something is returned.
 
 Since the goal is to return as often as possible without being wrong too often, I chose a point in the graph that is a good median between returning a headword often enough to be useful and with enough accuracy. It is for the configuration `0.2/M/M/A/0.3/0.1`, meaning:
+
 - definitions have a weight of 0.2,
 - the best example sentence is taken from a sense's examples,
 - the best set of example sentences is used for a headword,
@@ -111,6 +117,5 @@ For the average lemma, it is a good policy since it is heavily biased toward hea
 All of the models and source codes used in this project are used as-is and without modification.
 
 ## License
-
 
 This project is licensed under an Apache 2.0 license. See [LICENSE](LICENSE) for details.
