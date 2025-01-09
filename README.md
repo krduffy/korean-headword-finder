@@ -110,8 +110,11 @@ For the average lemma, it is a good policy since it is heavily biased toward hea
 ## Relevant Repositories
 
 [python-mecab-ko](https://github.com/jonghwanhyeon/python-mecab-ko): Korean lemmatization
+
 [KoBERT](https://github.com/SKTBrain/KoBERT): Korean text embedding
+
 [spaCy](https://github.com/explosion/spaCy): English lemmatization
+
 [BERT](https://github.com/google-research/bert): English text embedding
 
 All of the models and source codes used in this project are used as-is and without modification.
